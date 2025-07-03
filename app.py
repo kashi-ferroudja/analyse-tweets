@@ -24,7 +24,8 @@ def run_backend():
     """
     subprocess.run(
         [sys.executable, "backend.py"],
-        cwd=PIPELINE_DIR,
+        cwd=os.path.dirname(__file__),  # fonctionne en local et sur Streamlit
+,
         check=True
     )
     return
