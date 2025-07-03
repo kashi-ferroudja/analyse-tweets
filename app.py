@@ -23,11 +23,11 @@ def run_backend():
     data/tweets_analysis.db (et les CSV si tu en produis).
     """
     subprocess.run(
-        [sys.executable, "backend.py"],
-        cwd=os.path.dirname(__file__),  # fonctionne en local et sur Streamlit
-,
-        check=True
-    )
+    [sys.executable, "backend.py"],
+    cwd=os.path.dirname(__file__),  # fonctionne en local et sur Streamlit
+    check=True
+)
+
     return
 
 # 1) Config page
