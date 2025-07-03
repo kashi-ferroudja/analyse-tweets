@@ -38,7 +38,7 @@ def main():
     fake_results = df['text'].apply(predict_tweet)
     df['fake_news_label'] = fake_results.apply(lambda res: res[0])
     df['fake_news_probs'] = fake_results.apply(lambda res: json.dumps(res[1].tolist()))
-    step2_path = "data/bluesky_posts_step2.csv"
+    step2_path = "data/bluesky_posts_step2.csv" ##iidfbszi 
     df.to_csv(step2_path, index=False, encoding="utf-8-sig")
     print(f"✅ Étape 2 terminée → {step2_path}")
 
