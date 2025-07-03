@@ -10,17 +10,20 @@ import os
 # ────────────────
 # 0) Chemin vers ton dossier "profil_rouge" où se trouve pipeline.py
 BASE_DIR     = os.path.dirname(__file__)                     # ex: .../interface-web
-PIPELINE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "profil_rouge"))
+PIPELINE_DIR = os.path.abspath(os.path.join(BASE_DIR))
+
+
+
 # ────────────────
 
 @st.cache_data(show_spinner=False)
-def run_pipeline():
+def run_backend():
     """
     Exécute pipeline.py depuis le bon dossier pour régénérer
     data/tweets_analysis.db (et les CSV si tu en produis).
     """
     subprocess.run(
-        [sys.executable, "pipeline.py"],
+        [sys.executable, "backend.py"],
         cwd=PIPELINE_DIR,
         check=True
     )
@@ -30,7 +33,7 @@ def run_pipeline():
 st.set_page_config(page_title="Dashboard Tweets Bluesky", layout="wide")
 
 # 2) Lance la pipeline pour (re)construire la BDD
-run_pipeline()
+run_backend()
 
 # 3) Connexion SQLite
 DB_PATH = os.path.join(PIPELINE_DIR, "data", "tweets_analysis.db")
