@@ -9,19 +9,22 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # 1) Collecte des données Bluesky
-from test_getall_data import search_bluesky_posts
+#from test_getall_data import search_bluesky_posts
 
 # 2) Détection Fake News
-from test_bert_finet_final import predict_tweet
+#from test_bert_finet_final import predict_tweet
 
 # 3) Analyse émotionnelle
 #from test import predict_sentiment
 
 # 4) Score de fiabilité
-from scorefiab import compute_reliability, predict_sentiment
+#from scorefiab import compute_reliability, predict_sentiment
 
 
 def main():
+    from test_getall_data import search_bluesky_posts
+    from test_bert_finet_final import predict_tweet
+    from scorefiab import compute_reliability, predict_sentiment
     # ─── Étape 1 : Collecte et préparation ───
     print("🔍 Récupération des posts Bluesky…")
     posts = search_bluesky_posts(query="political", limit=200, lang="en")
