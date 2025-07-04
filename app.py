@@ -119,19 +119,56 @@
 # conn.close()
 
 
-import streamlit as st
+# # import streamlit as st
+# # import pandas as pd
+# # import os
+# # from backend import get_results_from_postgres  # ✅ Ajouté
+
+# # # 1) Config page
+# # st.set_page_config(page_title="Dashboard Tweets Bluesky", layout="wide")
+
+# # # 2) Charger les données depuis PostgreSQL
+# # @st.cache_data
+# # def load_data():
+# #     return get_results_from_postgres()
+
+# # df = load_data()
+
+from flask import Flask, render_template, request
 import pandas as pd
 import os
-from backend import get_results_from_postgres  # ✅ Ajouté
+from backend import main as run_pipeline
+from backend import get_results_from_postgres
 
-# 1) Config page
-st.set_page_config(page_title="Dashboard Tweets Bluesky", layout="wide")
+app = Flask(__name__)
 
-# 2) Charger les données depuis PostgreSQL
-@st.cache_data
-def load_data():
-    return get_results_from_postgres()
+@app.route("/")
+def index():
+    try:
+        # 1. Exécuter la pipeline
+        run_pipeline()
+        
+        # 2. Charger les résultats depuis PostgreSQL
+        df = get_results_from_postgres()
 
-df = load_data()
+        # 3. Appliquer les filtres (optionnels via paramètres GET)
+        min_score = int(request.args.get("min_score", 0))
+        fake_filter = request.args.get("fake_news", "Tous")
+        emotion_filter = request.args.getlist("emotion")
 
+        df_f = df[df["reliability_score"] >= min_score]
+
+        if fake_filter != "Tous":
+            df_f = df_f[df_f["fake_news_label"] == fake_filter]
+
+        if emotion_filter:
+            df_f = df_f[df_f["top_emotion"].isin(emotion_filter)]
+
+        return render_template("dashboard.html", data=df_f.to_dict(orient="records"))
+
+    except Exception as e:
+        return f"Une erreur est survenue : {e}", 500
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=10000)
 

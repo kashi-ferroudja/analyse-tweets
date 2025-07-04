@@ -3,4 +3,5 @@ transformers
 torch
 pandas
 scikit-learn
+flask
 psycopg

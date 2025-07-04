@@ -85,16 +85,27 @@ def main():
     print("💾 Mise à jour de la base PostgreSQL…")
 
     # Connexion à PostgreSQL (Neon)
+    # pg_conn = psycopg.connect(
+    #     host=os.environ["PG_HOST"],
+    #     dbname=os.environ["PG_DB"],
+    #     user=os.environ["PG_USER"],
+    #     password=os.environ["PG_PASS"],
+    #     port=5432,
+    #     sslmode="require"
+    # )
+    # pg_cursor = pg_conn.cursor()
+    
     pg_conn = psycopg.connect(
-        host=os.environ["PG_HOST"],
-        dbname=os.environ["PG_DB"],
-        user=os.environ["PG_USER"],
-        password=os.environ["PG_PASS"],
+        host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
+        dbname="analyse_tweet_db",
+        user="neondb_owner",
+        password="npg_tl7cKYQdWLe6",
         port=5432,
         sslmode="require"
     )
-    pg_cursor = pg_conn.cursor()
 
+    pg_cursor = pg_conn.cursor()
+    
     # Créer les tables si elles n'existent pas
     pg_cursor.execute("""
     CREATE TABLE IF NOT EXISTS posts (
@@ -146,11 +157,19 @@ def main():
 
 
 def get_results_from_postgres() -> pd.DataFrame:
+    # pg_conn = psycopg.connect(
+    #     host=os.environ["PG_HOST"],
+    #     dbname=os.environ["PG_DB"],
+    #     user=os.environ["PG_USER"],
+    #     password=os.environ["PG_PASS"],
+    #     port=5432,
+    #     sslmode="require"
+    # )
     pg_conn = psycopg.connect(
-        host=os.environ["PG_HOST"],
-        dbname=os.environ["PG_DB"],
-        user=os.environ["PG_USER"],
-        password=os.environ["PG_PASS"],
+        host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
+        dbname="analyse_tweet_db",
+        user="neondb_owner",
+        password="npg_tl7cKYQdWLe6",
         port=5432,
         sslmode="require"
     )
