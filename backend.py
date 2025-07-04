@@ -4,7 +4,7 @@ import os
 import json
 import sqlite3
 import pandas as pd
-
+import psycopg
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -61,22 +61,85 @@ def main():
     df.to_csv(step4_path, index=False, encoding="utf-8-sig")
     print(f"✅ Étape 4 terminée → {step4_path}")
 
-    # ─── Étape 5 : Création/Mise à jour de la BDD SQLite ───
-    print("💾 Mise à jour de la base SQLite…")
-    conn = sqlite3.connect("data/tweets_analysis.db")
-    df.to_sql("posts", conn, if_exists="replace", index=False)
-   # 5.2 analysis (tes colonnes d'analyse regroupées)
-    df[[
-        "post_uri",
-        "fake_news_label",
-        "fake_news_probs",
-        "top_emotion",
-        "reliability_score"
-    ]].to_sql("analysis", conn, if_exists="replace", index=False)
+#     # ─── Étape 5 : Création/Mise à jour de la BDD SQLite ───
+#     print("💾 Mise à jour de la base SQLite…")
+#     conn = sqlite3.connect("data/tweets_analysis.db")
+#     df.to_sql("posts", conn, if_exists="replace", index=False)
+#    # 5.2 analysis (tes colonnes d'analyse regroupées)
+#     df[[
+#         "post_uri",
+#         "fake_news_label",
+#         "fake_news_probs",
+#         "top_emotion",
+#         "reliability_score"
+#     ]].to_sql("analysis", conn, if_exists="replace", index=False)
 
 
-    conn.close()
-    print("✅ Base SQLite à jour : data/tweets_analysis.db")
+#     conn.close()
+#     print("✅ Base SQLite à jour : data/tweets_analysis.db")
+
+
+    print("💾 Mise à jour de la base PostgreSQL…")
+
+    # Connexion à PostgreSQL (Neon)
+    pg_conn = psycopg.connect(
+        host=os.environ["PG_HOST"],
+        dbname=os.environ["PG_DB"],
+        user=os.environ["PG_USER"],
+        password=os.environ["PG_PASS"],
+        port=5432,
+        sslmode="require"
+    )
+    pg_cursor = pg_conn.cursor()
+
+    # Créer les tables si elles n'existent pas
+    pg_cursor.execute("""
+    CREATE TABLE IF NOT EXISTS posts (
+        post_uri TEXT PRIMARY KEY,
+        text TEXT
+    )
+    """)
+
+    pg_cursor.execute("""
+    CREATE TABLE IF NOT EXISTS analysis (
+        post_uri TEXT PRIMARY KEY,
+        fake_news_label TEXT,
+        fake_news_probs TEXT,
+        top_emotion TEXT,
+        reliability_score INTEGER,
+        FOREIGN KEY (post_uri) REFERENCES posts(post_uri)
+    )
+    """)
+    pg_conn.commit()
+
+    # Insertion / Mise à jour dans PostgreSQL
+    for _, row in df.iterrows():
+        pg_cursor.execute("""
+            INSERT INTO posts (post_uri, text)
+            VALUES (%s, %s)
+            ON CONFLICT (post_uri) DO UPDATE SET text = EXCLUDED.text
+        """, (row["post_uri"], row["text"]))
+
+        pg_cursor.execute("""
+            INSERT INTO analysis (post_uri, fake_news_label, fake_news_probs, top_emotion, reliability_score)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (post_uri) DO UPDATE SET 
+                fake_news_label = EXCLUDED.fake_news_label,
+                fake_news_probs = EXCLUDED.fake_news_probs,
+                top_emotion = EXCLUDED.top_emotion,
+                reliability_score = EXCLUDED.reliability_score
+        """, (
+            row["post_uri"],
+            row["fake_news_label"],
+            row["fake_news_probs"],
+            row["top_emotion"],
+            int(row["reliability_score"])
+        ))
+
+    pg_conn.commit()
+    pg_cursor.close()
+    pg_conn.close()
+    print("✅ PostgreSQL à jour !")
 
 
 if __name__ == "__main__":
