@@ -165,7 +165,7 @@ def index():
             df_f = df_f[df_f["top_emotion"].isin(emotion_filter)]
 
         return render_template("dashboard.html", data=df_f.to_dict(orient="records"))
-
+ 
     except Exception as e:
         return f"Une erreur est survenue : {e}", 500
 
