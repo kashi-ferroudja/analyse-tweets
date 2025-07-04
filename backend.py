@@ -203,11 +203,20 @@ def get_results_from_postgres():
         JOIN analysis AS a USING(post_uri)
     """
 
+    # conn = psycopg.connect(
+    #     host=os.environ["PG_HOST"],
+    #     dbname=os.environ["PG_DB"],
+    #     user=os.environ["PG_USER"],
+    #     password=os.environ["PG_PASS"],
+    #     port=5432,
+    #     sslmode="require"
+    # )
+
     conn = psycopg.connect(
-        host=os.environ["PG_HOST"],
-        dbname=os.environ["PG_DB"],
-        user=os.environ["PG_USER"],
-        password=os.environ["PG_PASS"],
+        host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
+        dbname="analyse_tweet_db",
+        user="neondb_owner",
+        password="npg_tl7cKYQdWLe6",
         port=5432,
         sslmode="require"
     )
