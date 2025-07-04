@@ -1,6 +1,7 @@
 import sqlite3
 import psycopg
 import pandas as pd
+import os
 
 # --- 1. Connexion à SQLite
 sqlite_path = "data/tweets_analysis.db"
@@ -12,12 +13,21 @@ df_analysis = pd.read_sql("SELECT * FROM analysis", sqlite_conn)
 
 sqlite_conn.close()
 
-# --- 2. Connexion à PostgreSQL (Neon) — identifiants en dur
+# # --- 2. Connexion à PostgreSQL (Neon) — identifiants en dur
+# pg_conn = psycopg.connect(
+#     host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
+#     dbname="analyse_tweet_db",
+#     user="neondb_owner",
+#     password="npg_tl7cKYQdWLe6",
+#     port=5432,
+#     sslmode="require"
+# )
+
 pg_conn = psycopg.connect(
-    host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
-    dbname="analyse_tweet_db",
-    user="neondb_owner",
-    password="npg_tl7cKYQdWLe6",
+    host=os.environ["PG_HOST"],
+    dbname=os.environ["PG_DB"],
+    user=os.environ["PG_USER"],
+    password=os.environ["PG_PASS"],
     port=5432,
     sslmode="require"
 )
