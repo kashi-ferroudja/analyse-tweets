@@ -156,40 +156,74 @@ def main():
     print("✅ PostgreSQL à jour !")
 
 
-def get_results_from_postgres() -> pd.DataFrame:
-    # pg_conn = psycopg.connect(
-    #     host=os.environ["PG_HOST"],
-    #     dbname=os.environ["PG_DB"],
-    #     user=os.environ["PG_USER"],
-    #     password=os.environ["PG_PASS"],
-    #     port=5432,
-    #     sslmode="require"
-    # )
-    pg_conn = psycopg.connect(
-        host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
-        dbname="analyse_tweet_db",
-        user="neondb_owner",
-        password="npg_tl7cKYQdWLe6",
+# def get_results_from_postgres() -> pd.DataFrame:
+#     # pg_conn = psycopg.connect(
+#     #     host=os.environ["PG_HOST"],
+#     #     dbname=os.environ["PG_DB"],
+#     #     user=os.environ["PG_USER"],
+#     #     password=os.environ["PG_PASS"],
+#     #     port=5432,
+#     #     sslmode="require"
+#     # )
+#     pg_conn = psycopg.connect(
+#         host="ep-purple-bird-a23zswcw-pooler.eu-central-1.aws.neon.tech",
+#         dbname="analyse_tweet_db",
+#         user="neondb_owner",
+#         password="npg_tl7cKYQdWLe6",
+#         port=5432,
+#         sslmode="require"
+#     )
+
+#     query = """
+#     SELECT
+#     p.post_uri,
+#     p.text,
+#     a.fake_news_label,
+#     a.fake_news_probs,
+#     a.top_emotion,
+#     a.reliability_score
+#     FROM posts AS p
+#     JOIN analysis AS a USING(post_uri)
+#     """
+    
+#     df = pd.read_sql(query, pg_conn)
+#     pg_conn.close()
+#     return df
+
+def get_results_from_postgres():
+    query = """
+        SELECT
+            p.post_uri,
+            p.text,
+            a.fake_news_label,
+            a.fake_news_probs,
+            a.top_emotion,
+            a.reliability_score
+        FROM posts AS p
+        JOIN analysis AS a USING(post_uri)
+    """
+
+    conn = psycopg.connect(
+        host=os.environ["PG_HOST"],
+        dbname=os.environ["PG_DB"],
+        user=os.environ["PG_USER"],
+        password=os.environ["PG_PASS"],
         port=5432,
         sslmode="require"
     )
+    cur = conn.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
 
-    query = """
-    SELECT
-    p.post_uri,
-    p.text,
-    a.fake_news_label,
-    a.fake_news_probs,
-    a.top_emotion,
-    a.reliability_score
-    FROM posts AS p
-    JOIN analysis AS a USING(post_uri)
-    """
-    
-    df = pd.read_sql(query, pg_conn)
-    pg_conn.close()
+    # Obtenir les noms de colonnes
+    columns = [desc[0] for desc in cur.description]
+
+    # Fermer la connexion proprement
+    cur.close()
+    conn.close()
+
+    # Convertir en DataFrame
+    df = pd.DataFrame(rows, columns=columns)
     return df
-
-
 if __name__ == "__main__":
     main()
